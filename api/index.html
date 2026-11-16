@@ -1,0 +1,1616 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Cân Bằng">
+  <link rel="manifest" href="/manifest.json">
+  <title>Cân Bằng – Bảo Anh &amp; Kiệt</title>
+  <style>
+    :root {
+      --bg: #f7f4ee;
+      --card: #ffffff;
+      --p: #0f766e;
+      --p-soft: #f0fdfa;
+      --p-line: #99f6e4;
+      --a: #d97706;
+      --a-soft: #fffbeb;
+      --ok: #059669;
+      --err: #dc2626;
+      --t: #1f2937;
+      --m: #6b7280;
+      --b: #e5e7eb;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--t);
+      line-height: 1.5;
+      padding-bottom: calc(88px + env(safe-area-inset-bottom));
+    }
+    input, select, textarea {
+      font-size: 16px;
+      font-family: inherit;
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      background: #fff;
+      color: var(--t);
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--p);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
+    }
+    button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 14px; }
+
+    /* Header App Bar */
+    .app-header {
+      background: var(--card);
+      border: 1px solid var(--b);
+      border-radius: 20px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    }
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; }
+    .brand h1 { margin: 0; font-size: 20px; color: var(--p); letter-spacing: -0.3px; }
+    .sync-badge {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--p);
+      background: #ccfbf1;
+      padding: 4px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f3f4f6;
+      border: 0;
+      border-radius: 999px;
+      padding: 6px 11px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--t);
+    }
+
+    /* Thanh tiến độ hôm nay */
+    .today-bar {
+      background: var(--p-soft);
+      border: 1px solid var(--p-line);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+    .today-nums {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .prog-track {
+      height: 8px;
+      background: #d1fae5;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0f766e, #10b981);
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+    .latest-banner {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      padding: 8px 10px;
+      background: #fff;
+      border: 1px solid var(--p-line);
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .latest-banner img {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    /* Tabs Bottom Nav on Mobile, Top Nav on Desktop */
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .tab-btn {
+      border: 1px solid var(--b);
+      background: var(--card);
+      color: var(--m);
+      border-radius: 14px;
+      padding: 10px 6px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.2s;
+    }
+    .tab-btn .ico { font-size: 18px; line-height: 1; }
+    .tab-btn.active {
+      background: var(--p);
+      color: #fff;
+      border-color: var(--p);
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
+    }
+    @media (max-width: 760px) {
+      .tabs {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 800;
+        margin: 0;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid var(--b);
+        padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+        gap: 6px;
+      }
+      .tab-btn {
+        border: 0;
+        background: transparent;
+        padding: 6px 4px;
+        font-size: 11px;
+        border-radius: 12px;
+      }
+      .tab-btn.active { background: var(--p-soft); color: var(--p); box-shadow: none; }
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--b);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    }
+    .card h2 { margin: 0 0 12px; font-size: 16.5px; color: var(--p); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .field { margin-bottom: 11px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #374151; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14.5px;
+      font-weight: 700;
+      background: var(--p);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-sec { background: var(--a); color: #fff; }
+    .btn-ghost { background: #f3f4f6; color: var(--t); }
+    .btn-outline { background: #fff; color: var(--p); border: 1.5px solid var(--p); }
+    .btn-sm { padding: 7px 11px; font-size: 12.5px; border-radius: 10px; }
+    .btn-full { width: 100%; }
+
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: var(--t);
+      border-radius: 999px;
+      padding: 8px 13px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .pill.on { background: var(--p); color: #fff; border-color: var(--p); }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
+    .stat-box {
+      background: #f9fafb;
+      border: 1px solid var(--b);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+    .stat-box .lbl { font-size: 11.5px; color: var(--m); font-weight: 600; }
+    .stat-box .val { font-size: 18px; font-weight: 800; color: var(--p); margin-top: 2px; }
+    .stat-box .sub { font-size: 11px; color: var(--m); }
+
+    .note-box {
+      background: var(--a-soft);
+      border: 1px solid #fde68a;
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 13px;
+      color: #78350f;
+    }
+    .info-box {
+      background: var(--p-soft);
+      border: 1px solid var(--p-line);
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 13px;
+    }
+
+    /* Live Photo Meal Feed */
+    .feed-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px;
+      border: 1px solid var(--b);
+      border-radius: 14px;
+      background: #fff;
+      margin-bottom: 10px;
+    }
+    .feed-thumb {
+      width: 92px;
+      height: 92px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #f3f4f6;
+      cursor: zoom-in;
+    }
+    .meal-photo-drop {
+      border: 2px dashed #99f6e4;
+      background: var(--p-soft);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .preview-img {
+      width: 100%;
+      max-height: 260px;
+      object-fit: cover;
+      border-radius: 14px;
+      margin-top: 10px;
+      display: none;
+      cursor: zoom-in;
+    }
+
+    /* Week day selector */
+    .day-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .day-tabs::-webkit-scrollbar { display: none; }
+    .day-chip {
+      flex: 0 0 auto;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--b);
+      background: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--m);
+    }
+    .day-chip.active { background: var(--p); color: #fff; border-color: var(--p); }
+
+    .meal-card {
+      background: #f9fafb;
+      border: 1px solid var(--b);
+      border-radius: 14px;
+      padding: 11px 13px;
+      margin-bottom: 8px;
+    }
+    .meal-card strong { color: var(--p); font-size: 13.5px; }
+
+    .log-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--b);
+    }
+    .log-row:last-child { border-bottom: 0; }
+
+    /* Lock screen & Lightbox & Toast */
+    .lock-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: linear-gradient(155deg, #f7f4ee 0%, #e0f2f1 100%);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .lock-card {
+      background: #fff;
+      width: 100%;
+      max-width: 390px;
+      border-radius: 24px;
+      padding: 26px 22px;
+      box-shadow: 0 20px 50px rgba(15, 118, 110, 0.16);
+      border: 1px solid var(--p-line);
+    }
+    .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .role-btn {
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .role-btn.on { border: 2px solid var(--p); background: var(--p-soft); color: var(--p); }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(0, 0, 0, 0.88);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .lightbox img { max-width: 100%; max-height: 90vh; border-radius: 12px; }
+
+    #toast {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translate(-50%, -140%);
+      background: #111827;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 10001;
+      transition: transform 0.25s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      max-width: 90vw;
+      text-align: center;
+    }
+    #toast.show { transform: translate(-50%, 0); }
+
+    .switch-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+    }
+    .muted { color: var(--m); font-size: 13px; }
+    .chart-box { width: 100%; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <div id="toast"></div>
+
+  <!-- Phóng to ảnh -->
+  <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
+    <img id="lightboxImg" src="" alt="Ảnh món ăn">
+  </div>
+
+  <!-- Màn hình khóa mật khẩu (baoanhkiet) -->
+  <div id="lockOverlay" class="lock-overlay">
+    <div class="lock-card">
+      <div style="text-align:center;margin-bottom:18px;">
+        <div style="font-size:38px;margin-bottom:6px;">🔐</div>
+        <h2 style="margin:0;color:var(--p);font-size:21px;">Cân Bằng – Bảo Anh &amp; Kiệt</h2>
+        <p class="muted" style="margin:6px 0 0;">Nhập mật khẩu để vào web &amp; đồng bộ trực tiếp 2 máy</p>
+      </div>
+      <form id="unlockForm">
+        <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Bạn là ai?</label>
+        <div class="role-grid">
+          <button type="button" class="role-btn on" data-role="Cô ấy (Bảo Anh)">👩 Cô ấy</button>
+          <button type="button" class="role-btn" data-role="Anh (Kiệt)">👨 Anh</button>
+        </div>
+        <div class="field">
+          <input id="roleInput" type="text" value="Cô ấy (Bảo Anh)" placeholder="Tên hiển thị" required>
+        </div>
+        <div class="field" style="position:relative;">
+          <label>Mật khẩu truy cập</label>
+          <input id="passInput" type="password" placeholder="Nhập mật khẩu..." autocomplete="current-password" required style="padding-right:42px;">
+          <button type="button" id="togglePassBtn" style="position:absolute;right:10px;bottom:9px;background:none;border:0;font-size:18px;">👁️</button>
+        </div>
+        <button id="unlockBtn" type="submit" class="btn btn-full">Vào App &amp; Lưu trên máy</button>
+        <p id="lockErr" style="color:var(--err);font-size:13px;text-align:center;margin:10px 0 0;"></p>
+      </form>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="top-row">
+        <div class="brand">
+          <h1>🌿 Cân Bằng</h1>
+          <span id="syncBadge" class="sync-badge">Đang kết nối...</span>
+        </div>
+        <button id="lockSwitchBtn" type="button" class="user-chip">👤 <span id="roleLabel">...</span> 🔒</button>
+      </div>
+
+      <div class="today-bar">
+        <div class="today-nums">
+          <span id="todaySummaryText">Hôm nay: 0 / 2.000 kcal</span>
+          <span id="todayMacroText" style="color:var(--p);">Đạm: 0g • Nước: 2.0L</span>
+        </div>
+        <div class="prog-track">
+          <div id="todayProgFill" class="prog-fill" style="width:0%;"></div>
+        </div>
+      </div>
+
+      <div id="latestBanner" class="latest-banner" onclick="switchTab('photo')"></div>
+    </header>
+
+    <!-- Navigation 4 Tabs -->
+    <nav class="tabs">
+      <button type="button" class="tab-btn active" data-tab="goal"><span class="ico">🎯</span><span>Mục tiêu</span></button>
+      <button type="button" class="tab-btn" data-tab="photo"><span class="ico">📸</span><span>Bữa ăn</span></button>
+      <button type="button" class="tab-btn" data-tab="week"><span class="ico">📅</span><span>Thực đơn</span></button>
+      <button type="button" class="tab-btn" data-tab="track"><span class="ico">📈</span><span>Cân nặng</span></button>
+    </nav>
+
+    <!-- TAB 1: MỤC TIÊU -->
+    <section id="goal" class="panel active">
+      <div class="grid">
+        <div class="card">
+          <h2>Thông tin cơ thể &amp; Mục tiêu</h2>
+          <div class="row2">
+            <div class="field"><label>Tuổi</label><input id="age" type="number" min="14" max="80"></div>
+            <div class="field"><label>Chiều cao (cm)</label><input id="height" type="number" min="120" max="210"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>Cân nặng hiện tại (kg)</label><input id="weight" type="number" step="0.1" min="25" max="150"></div>
+            <div class="field">
+              <label>Mức vận động</label>
+              <select id="act">
+                <option value="1.2">Ít (ngồi nhiều)</option>
+                <option value="1.375">Nhẹ (1-3 buổi/tuần)</option>
+                <option value="1.55">Vừa (3-5 buổi/tuần)</option>
+                <option value="1.725">Nhiều (tập nặng)</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Tốc độ tăng cân mong muốn</label>
+            <select id="pace">
+              <option value="300">Nhẹ nhàng (+300 kcal/ngày • ~0.25 kg/tuần)</option>
+              <option value="500">Nhanh hơn (+500 kcal/ngày • ~0.5 kg/tuần)</option>
+            </select>
+          </div>
+          <button id="saveProfileBtn" type="button" class="btn btn-full">💾 Lưu mục tiêu &amp; Đồng bộ</button>
+        </div>
+
+        <div class="card">
+          <h2>Chỉ số khuyến nghị mỗi ngày</h2>
+          <div id="goalOut"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Chất đang thiếu cần ưu tiên bổ sung</h2>
+        <p class="muted" style="margin:-6px 0 10px;">Chọn những chất cơ thể hay thiếu để AI tự lồng ghép vào thực đơn hàng ngày:</p>
+        <div id="defGrid" class="pills" style="margin-bottom:12px;"></div>
+        <div id="defTips"></div>
+      </div>
+
+      <div class="note-box">
+        <strong>Lưu ý y tế:</strong> Công cụ hỗ trợ ước tính dinh dưỡng tham khảo. Nếu BMI dưới 18.5 kéo dài, sụt cân không rõ lý do, mất kinh nguyệt hoặc mệt mỏi kéo dài, nên đi khám bác sĩ để kiểm tra tuyến giáp, thiếu máu hoặc hấp thụ tiêu hóa.
+      </div>
+    </section>
+
+    <!-- TAB 2: BỮA ĂN & ẢNH TRỰC TIẾP -->
+    <section id="photo" class="panel">
+      <!-- Bảng trực tiếp 2 máy -->
+      <div class="card" style="background:var(--p-soft);border-color:var(--p-line);">
+        <h2>
+          <span>📸 Bữa ăn vừa chụp (2 máy cùng xem)</span>
+          <label for="quickCamInput" class="btn btn-sm">+ Chụp gửi nhanh</label>
+          <input id="quickCamInput" type="file" accept="image/*" style="display:none;">
+        </h2>
+        <div id="liveFeedList"></div>
+      </div>
+
+      <div class="grid">
+        <!-- Chụp ảnh phân tích AI -->
+        <div class="card">
+          <h2>🤖 Chụp ảnh để AI tính Calo</h2>
+          <div class="meal-photo-drop">
+            <div style="font-size:28px;margin-bottom:4px;">📷</div>
+            <div style="font-size:13.5px;font-weight:600;margin-bottom:10px;">Chụp hoặc chọn ảnh mâm cơm / đồ ăn</div>
+            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+              <label for="mealCam" class="btn btn-sm">📷 Chụp ảnh</label>
+              <label for="mealFile" class="btn btn-sm btn-outline">🖼️ Thư viện ảnh</label>
+            </div>
+            <input id="mealCam" type="file" accept="image/*" capture="environment" style="display:none;">
+            <input id="mealFile" type="file" accept="image/*" style="display:none;">
+            <img id="imgPrev" class="preview-img" src="" alt="Xem trước bữa ăn" onclick="openLightbox(this.src)">
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label>Bữa nào?</label>
+              <select id="mealSlot">
+                <option value="Sáng">Bữa sáng</option>
+                <option value="Phụ sáng">Bữa phụ sáng</option>
+                <option value="Trưa">Bữa trưa</option>
+                <option value="Phụ chiều">Bữa phụ chiều</option>
+                <option value="Tối">Bữa tối</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Ghi chú thêm (nếu có)</label>
+              <input id="mealHint" type="text" placeholder="Vd: ít cơm, thêm 1 quả trứng">
+            </div>
+          </div>
+
+          <button id="analyzeBtn" type="button" class="btn btn-full">✨ Phân tích bằng AI &amp; Chia sẻ ảnh</button>
+          <div id="aiOut" style="margin-top:12px;"></div>
+        </div>
+
+        <!-- Đồ trong tủ lạnh & Thêm tay -->
+        <div>
+          <div class="card">
+            <h2>🧊 Đồ ăn đang có sẵn ở nhà</h2>
+            <div id="pantryGrid" class="pills" style="margin-bottom:10px;"></div>
+            <div class="field" style="margin-bottom:0;">
+              <label>Nguyên liệu khác (ngăn cách dấu phẩy)</label>
+              <input id="pantryExtra" type="text" placeholder="Vd: bí đỏ, yến mạch, bơ sáp...">
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>✏️ Thêm nhanh bữa ăn (không cần ảnh)</h2>
+            <div class="field"><label>Tên món đã ăn</label><input id="manualName" type="text" placeholder="Vd: 1 ly sữa tươi + 2 quả chuối"></div>
+            <div class="row2">
+              <div class="field"><label>Calo ước tính (kcal)</label><input id="manualKcal" type="number" placeholder="320"></div>
+              <div class="field"><label>Đạm (g)</label><input id="manualPro" type="number" placeholder="12"></div>
+            </div>
+            <button id="addManualBtn" type="button" class="btn btn-outline btn-full">+ Cộng vào Nhật ký hôm nay</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nhật ký hôm nay -->
+      <div class="card">
+        <h2>
+          <span>📝 Nhật ký hôm nay (<span id="todayDateLbl"></span>)</span>
+          <button id="clearTodayBtn" type="button" class="btn btn-sm btn-ghost">Làm mới ngày</button>
+        </h2>
+        <div class="switch-row" style="border-bottom:1px solid var(--b);margin-bottom:8px;">
+          <span style="font-size:13.5px;font-weight:600;">Tự động gọi AI cập nhật thực đơn sau khi ăn</span>
+          <input id="autoPlan" type="checkbox" style="width:20px;height:20px;accent-color:var(--p);">
+        </div>
+        <div id="logList"></div>
+      </div>
+
+      <!-- Thực đơn AI gợi ý cho phần còn lại trong ngày -->
+      <div class="card">
+        <h2>
+          <span>🍲 Gợi ý bữa tiếp theo hôm nay</span>
+          <button id="genTodayBtn" type="button" class="btn btn-sm btn-sec">✨ AI gợi ý ngay</button>
+        </h2>
+        <div id="todayPlanOut"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: THỰC ĐƠN 7 NGÀY & TẬP LUYỆN -->
+    <section id="week" class="panel">
+      <div class="card">
+        <h2>
+          <span>📅 Thực đơn 7 ngày món Việt</span>
+          <button id="genWeekBtn" type="button" class="btn btn-sm">✨ AI lập cả tuần</button>
+        </h2>
+        <div id="dayTabs" class="day-tabs"></div>
+        <div id="weekOut"></div>
+      </div>
+
+      <div class="card">
+        <h2>💪 Kế hoạch vận động tăng cơ khỏe</h2>
+        <div id="workoutOut"></div>
+      </div>
+    </section>
+
+    <!-- TAB 4: THEO DÕI CÂN NẶNG & SAO LƯU -->
+    <section id="track" class="panel">
+      <div class="grid">
+        <div class="card">
+          <h2>⚖️ Ghi nhận cân nặng</h2>
+          <div class="row2">
+            <div class="field"><label>Ngày cân</label><input id="wDate" type="date"></div>
+            <div class="field"><label>Cân nặng (kg)</label><input id="wVal" type="number" step="0.1" placeholder="45.5"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>Mục tiêu (kg)</label><input id="wGoal" type="number" step="0.1" placeholder="50"></div>
+            <div class="field"><label>Hạn chót (tùy chọn)</label><input id="wDeadline" type="date"></div>
+          </div>
+          <button id="addWeightBtn" type="button" class="btn btn-full">➕ Lưu cân nặng</button>
+        </div>
+
+        <div class="card">
+          <h2>📊 Tiến độ &amp; Dự báo</h2>
+          <div id="wStats"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>📈 Biểu đồ cân nặng</h2>
+        <div id="wChart" class="chart-box"></div>
+      </div>
+
+      <div class="card">
+        <h2>🗂️ Lịch sử cân nặng</h2>
+        <div id="wList"></div>
+      </div>
+
+      <div class="card">
+        <h2>💾 Sao lưu dự phòng</h2>
+        <p class="muted" style="margin:-4px 0 10px;">Dữ liệu đã tự động đồng bộ trên đám mây. Bạn cũng có thể tải file dự phòng về máy:</p>
+        <div class="row2">
+          <button id="exportBtn" type="button" class="btn btn-outline">⬇️ Tải file .JSON</button>
+          <label class="btn btn-ghost" style="margin:0;">
+            ⬆️ Khôi phục file
+            <input id="importFile" type="file" accept=".json,application/json" style="display:none;">
+          </label>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ========= 1. DỮ LIỆU GỐC & TRẠNG THÁI =========
+    const DEFS = [
+      { id: "iron", name: "Sắt", foods: "Thịt bò, gan gà, cải bó xôi, đậu lăng, huyết", tip: "Ăn kèm cam/chanh giàu Vitamin C; tránh uống trà/cà phê ngay sau bữa." },
+      { id: "calcium", name: "Canxi", foods: "Sữa tươi, sữa chua, phô mai, cá nhỏ ăn xương, đậu hũ", tip: "Chia nhỏ 2-3 lần/ngày để hấp thụ tốt nhất." },
+      { id: "vitd", name: "Vitamin D", foods: "Cá hồi, lòng đỏ trứng, nấm, sữa tăng cường Vit D", tip: "Phơi nắng dịu 15 phút buổi sáng giúp tổng hợp Vitamin D tự nhiên." },
+      { id: "b12", name: "Vitamin B12", foods: "Trứng, thịt, cá, sữa, ngao/sò", tip: "Rất cần cho tạo máu và giảm mệt mỏi." },
+      { id: "zinc", name: "Kẽm", foods: "Hàu, tôm, thịt bò, hạt bí, đậu xanh", tip: "Giúp ăn ngon miệng hơn và hỗ trợ tổng hợp cơ bắp." },
+      { id: "magnesium", name: "Magie", foods: "Hạt điều, hạnh nhân, chuối, bơ, rau xanh đậm", tip: "Hỗ trợ ngủ sâu giấc và phục hồi cơ." },
+      { id: "protein", name: "Đạm (Protein)", foods: "Ức gà, trứng, cá, thịt nạc, đậu hũ, sữa chua Hy Lạp", tip: "Chia đều 20-30g đạm mỗi bữa chính để dễ tăng cơ." },
+      { id: "folate", name: "Folate (B9)", foods: "Rau bina, bông cải xanh, măng tây, đậu đỏ, bơ", tip: "Nấu vừa chín tới để giữ Vitamin B9." },
+      { id: "omega3", name: "Omega-3", foods: "Cá hồi, cá thu, cá trích, hạt chia, óc chó", tip: "Giúp giảm viêm và hỗ trợ nội tiết nữ khỏe mạnh." }
+    ];
+
+    const PANTRY_LIST = [
+      "Trứng gà", "Thịt heo/băm", "Thịt bò", "Thịt gà", "Cá/tôm",
+      "Đậu hũ", "Rau xanh", "Cơm/bún/mì", "Sữa tươi/sữa chua", "Chuối/cam", "Hạt điều/lạc"
+    ];
+
+    const DAYS_VN = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"];
+
+    const STATE_KEY = "cb_app_state_v2";
+    const TOKEN_KEY = "cb_pass_token";
+    const ROLE_KEY = "cb_role_name";
+    const VER_KEY = "cb_cloud_ver";
+    const DEV_KEY = "cb_device_id";
+
+    let deviceId = localStorage.getItem(DEV_KEY);
+    if (!deviceId) {
+      deviceId = "d_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem(DEV_KEY, deviceId);
+    }
+
+    function todayISO() {
+      const d = new Date();
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+
+    function defaultState() {
+      return {
+        profile: { age: 24, height: 158, weight: 44, act: 1.375, pace: 300, defs: ["iron", "protein"] },
+        pantry: ["Trứng gà", "Thịt heo/băm", "Rau xanh", "Cơm/bún/mì", "Sữa tươi/sữa chua"],
+        pantryExtra: "",
+        autoPlan: true,
+        logsByDate: {},
+        todayPlan: null,
+        weekPlan: null,
+        weights: [],
+        wGoal: 49,
+        wDeadline: ""
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STATE_KEY);
+        if (!raw) return defaultState();
+        const parsed = JSON.parse(raw);
+        return { ...defaultState(), ...parsed, profile: { ...defaultState().profile, ...(parsed.profile || {}) } };
+      } catch {
+        return defaultState();
+      }
+    }
+
+    let state = loadState();
+    let mealFeed = [];
+    let selectedWeekDay = 0;
+    let currentImageForAI = "";
+    let lastAIAnalysis = null;
+    let pushTimer = null;
+    let pollTimer = null;
+
+    // ========= 2. TIỆN ÍCH UI & HÌNH ẢNH =========
+    function $(id) { return document.getElementById(id); }
+    function esc(s) { return String(s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+    function fmtTime(ts) { return new Date(ts || Date.now()).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }); }
+
+    function toast(msg) {
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(el._t);
+      el._t = setTimeout(() => el.classList.remove("show"), 2800);
+    }
+
+    function openLightbox(src) {
+      if (!src) return;
+      $("lightboxImg").src = src;
+      $("lightbox").style.display = "flex";
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-btn").forEach((b) => b.classList.toggle("active", b.dataset.tab === tabId));
+      document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === tabId));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.onclick = () => switchTab(btn.dataset.tab);
+    });
+
+    function compressImage(file, maxW = 720, quality = 0.72) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => {
+          const img = new Image();
+          img.onerror = reject;
+          img.onload = () => {
+            const scale = Math.min(1, maxW / img.width);
+            const w = Math.round(img.width * scale);
+            const h = Math.round(img.height * scale);
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL("image/jpeg", quality));
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ========= 3. TÍNH TOÁN DINH DƯỠNG & MỤC TIÊU =========
+    function calcMetrics() {
+      const p = state.profile;
+      const a = Math.max(14, Number(p.age) || 24);
+      const h = Math.max(120, Number(p.height) || 158);
+      const w = Math.max(25, Number(p.weight) || 44);
+      const act = Number(p.act) || 1.375;
+      const pace = Number(p.pace) || 300;
+
+      const bmr = Math.round(10 * w + 6.25 * h - 5 * a - 161);
+      const tdee = Math.round(bmr * act);
+      const target = tdee + pace;
+      const bmi = +(w / ((h / 100) ** 2)).toFixed(1);
+
+      let bmiLabel = "Bình thường", bmiColor = "var(--ok)";
+      if (bmi < 18.5) { bmiLabel = "Thiếu cân"; bmiColor = "var(--a)"; }
+      else if (bmi >= 23 && bmi < 25) { bmiLabel = "Thừa cân nhẹ"; bmiColor = "var(--a)"; }
+      else if (bmi >= 25) { bmiLabel = "Thừa cân"; bmiColor = "var(--err)"; }
+
+      const proG = Math.round(w * 1.6);
+      const fatG = Math.round((target * 0.28) / 9);
+      const carbG = Math.max(50, Math.round((target - proG * 4 - fatG * 9) / 4));
+      const waterL = +(w * 0.035).toFixed(1);
+
+      const slots = [
+        { name: "Sáng", pct: 0.25 },
+        { name: "Phụ sáng", pct: 0.10 },
+        { name: "Trưa", pct: 0.30 },
+        { name: "Phụ chiều", pct: 0.10 },
+        { name: "Tối", pct: 0.25 }
+      ].map((s) => ({
+        name: s.name,
+        kcal: Math.round(target * s.pct),
+        pro: Math.round(proG * s.pct)
+      }));
+
+      return { bmr, tdee, target, bmi, bmiLabel, bmiColor, proG, carbG, fatG, waterL, pace, slots };
+    }
+
+    function renderGoalTab() {
+      const p = state.profile;
+      $("age").value = p.age;
+      $("height").value = p.height;
+      $("weight").value = p.weight;
+      $("act").value = String(p.act);
+      $("pace").value = String(p.pace);
+
+      const m = calcMetrics();
+      $("goalOut").innerHTML = `
+        <div class="stat-grid">
+          <div class="stat-box"><div class="lbl">Mục tiêu mỗi ngày</div><div class="val">${m.target.toLocaleString()} kcal</div><div class="sub">TDEE ${m.tdee} + ${m.pace} kcal</div></div>
+          <div class="stat-box"><div class="lbl">Chỉ số BMI (Châu Á)</div><div class="val" style="color:${m.bmiColor}">${m.bmi}</div><div class="sub">${m.bmiLabel} • BMR ${m.bmr}</div></div>
+          <div class="stat-box"><div class="lbl">Đạm • Tinh bột • Béo</div><div class="val" style="font-size:15px;">${m.proG}g • ${m.carbG}g • ${m.fatG}g</div><div class="sub">Ưu tiên tăng cơ khỏe</div></div>
+          <div class="stat-box"><div class="lbl">Nước mỗi ngày</div><div class="val">${m.waterL} L</div><div class="sub">Uống rải đều trong ngày</div></div>
+        </div>
+        <div class="info-box">
+          <strong>Chia 5 bữa dễ ăn:</strong><br>
+          ${m.slots.map((s) => `• <b>${s.name}:</b> ~${s.kcal} kcal (${s.pro}g đạm)`).join("<br>")}
+        </div>
+      `;
+
+      $("defGrid").innerHTML = DEFS.map((d) => {
+        const on = (p.defs || []).includes(d.id);
+        return `<button type="button" class="pill ${on ? "on" : ""}" data-def="${d.id}">${d.name}</button>`;
+      }).join("");
+
+      $("defGrid").querySelectorAll("[data-def]").forEach((btn) => {
+        btn.onclick = () => {
+          const id = btn.dataset.def;
+          const set = new Set(state.profile.defs || []);
+          if (set.has(id)) set.delete(id); else set.add(id);
+          state.profile.defs = [...set];
+          saveStateAndSync();
+          renderGoalTab();
+        };
+      });
+
+      const chosen = DEFS.filter((d) => (p.defs || []).includes(d.id));
+      $("defTips").innerHTML = chosen.length
+        ? chosen.map((d) => `<div class="meal-card"><strong>${d.name}:</strong> ${d.foods}<br><span class="muted">💡 ${d.tip}</span></div>`).join("")
+        : `<p class="muted">Chưa chọn vi chất nào cần bổ sung thêm.</p>`;
+    }
+
+    $("saveProfileBtn").onclick = () => {
+      state.profile.age = Number($("age").value) || 24;
+      state.profile.height = Number($("height").value) || 158;
+      state.profile.weight = Number($("weight").value) || 44;
+      state.profile.act = Number($("act").value) || 1.375;
+      state.profile.pace = Number($("pace").value) || 300;
+      saveStateAndSync();
+      renderAll();
+      toast("💾 Đã lưu mục tiêu & đồng bộ 2 máy!");
+    };
+
+    // ========= 4. ĐỒNG BỘ CLOUD (VERCEL + UPSTASH REDIS) =========
+    function getToken() { return localStorage.getItem(TOKEN_KEY) || ""; }
+    function setBadge(txt) { $("syncBadge").textContent = txt; }
+
+    async function apiCall(endpoint, action, payload = {}) {
+      const headers = { "Content-Type": "application/json" };
+      const t = getToken();
+      if (t) headers["Authorization"] = "Bearer " + t;
+      const url = action ? `${endpoint}?action=${encodeURIComponent(action)}` : endpoint;
+      const res = await fetch(url, { method: "POST", headers, body: JSON.stringify(payload) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      return data;
+    }
+
+    function saveStateAndSync(immediate = false) {
+      localStorage.setItem(STATE_KEY, JSON.stringify(state));
+      renderTodayHeader();
+      if (!getToken()) return;
+      clearTimeout(pushTimer);
+      const run = async () => {
+        try {
+          setBadge("Đang lưu...");
+          const res = await apiCall("/api/sync", "saveState", { deviceId, state });
+          localStorage.setItem(VER_KEY, String(res.version));
+          setBadge(`Trực tiếp ☁️ • ${fmtTime(res.version)}`);
+        } catch (err) {
+          setBadge("Chưa nối Cloud");
+        }
+      };
+      if (immediate) run(); else pushTimer = setTimeout(run, 450);
+    }
+
+    async function pullFromCloud(isInitial = false) {
+      if (!getToken()) return;
+      try {
+        const room = await apiCall("/api/sync", "get");
+        mealFeed = Array.isArray(room.mealFeed) ? room.mealFeed : [];
+        renderMealFeed();
+
+        const remoteVer = Number(room.version || 0);
+        const localVer = Number(localStorage.getItem(VER_KEY) || 0);
+
+        if (remoteVer === 0 && room.state === null) {
+          await saveStateAndSync(true);
+          return;
+        }
+
+        if (remoteVer > localVer && room.state) {
+          localStorage.setItem(VER_KEY, String(remoteVer));
+          const sameState = JSON.stringify(state) === JSON.stringify(room.state);
+          if (!sameState) {
+            state = { ...defaultState(), ...room.state };
+            localStorage.setItem(STATE_KEY, JSON.stringify(state));
+            renderAll();
+          }
+          if (!isInitial && room.deviceId !== deviceId) {
+            toast(`☁️ ${room.updatedByName || "Người kia"} vừa cập nhật!`);
+          }
+        }
+        if (remoteVer > 0) setBadge(`Trực tiếp ☁️ • ${fmtTime(remoteVer)}`);
+      } catch (err) {
+        if (String(err.message).includes("hết hạn")) showLockScreen();
+        else setBadge("Chưa nối Storage");
+      }
+    }
+
+    async function checkUpdates() {
+      if (!getToken() || document.visibilityState !== "visible") return;
+      try {
+        const info = await apiCall("/api/sync", "check");
+        const localVer = Number(localStorage.getItem(VER_KEY) || 0);
+        if (Number(info.version || 0) > localVer) {
+          await pullFromCloud(false);
+        }
+      } catch {}
+    }
+
+    function startPolling() {
+      clearInterval(pollTimer);
+      pollTimer = setInterval(checkUpdates, 3000);
+    }
+
+    // ========= 5. KHÓA MẬT KHẨU & CHỌN VAI TRÒ =========
+    function showLockScreen() {
+      clearInterval(pollTimer);
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(VER_KEY);
+      $("lockOverlay").style.display = "flex";
+    }
+
+    document.querySelectorAll(".role-btn").forEach((btn) => {
+      btn.onclick = () => {
+        document.querySelectorAll(".role-btn").forEach((b) => b.classList.remove("on"));
+        btn.classList.add("on");
+        $("roleInput").value = btn.dataset.role;
+      };
+    });
+
+    $("togglePassBtn").onclick = () => {
+      $("passInput").type = $("passInput").type === "password" ? "text" : "password";
+    };
+
+    $("lockSwitchBtn").onclick = () => {
+      if (confirm("Khóa lại web hoặc đổi sang người dùng khác?")) showLockScreen();
+    };
+
+    $("unlockForm").onsubmit = async (e) => {
+      e.preventDefault();
+      $("lockErr").textContent = "";
+      const btn = $("unlockBtn");
+      btn.disabled = true;
+      btn.textContent = "Đang kiểm tra...";
+      try {
+        const res = await apiCall("/api/sync", "unlock", {
+          roleName: $("roleInput").value.trim(),
+          password: $("passInput").value.trim()
+        });
+        localStorage.setItem(TOKEN_KEY, res.token);
+        localStorage.setItem(ROLE_KEY, res.roleName);
+        $("roleLabel").textContent = res.roleName;
+        $("lockOverlay").style.display = "none";
+        await pullFromCloud(true);
+        startPolling();
+        toast("🎉 Đã mở khóa & kết nối trực tiếp!");
+      } catch (err) {
+        $("lockErr").textContent = err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Vào App & Lưu trên máy";
+      }
+    };
+
+    // ========= 6. TAB BỮA ĂN, ẢNH TRỰC TIẾP & AI =========
+    function renderTodayHeader() {
+      const m = calcMetrics();
+      const logs = state.logsByDate[todayISO()] || [];
+      const eatenKcal = logs.reduce((s, x) => s + Number(x.kcal || 0), 0);
+      const eatenPro = logs.reduce((s, x) => s + Number(x.pro || 0), 0);
+      const pct = Math.min(100, Math.round((eatenKcal / m.target) * 100));
+
+      $("todaySummaryText").textContent = `Hôm nay: ${eatenKcal.toLocaleString()} / ${m.target.toLocaleString()} kcal (${pct}%)`;
+      $("todayMacroText").textContent = `Đạm: ${eatenPro}/${m.proG}g • Nước: ${m.waterL}L`;
+      $("todayProgFill").style.width = pct + "%";
+    }
+
+    function renderMealFeed() {
+      const banner = $("latestBanner");
+      if (mealFeed.length > 0) {
+        const top = mealFeed[0];
+        banner.style.display = "flex";
+        banner.innerHTML = `
+          ${top.imageData ? `<img src="${top.imageData}" alt="">` : ""}
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:700;color:var(--p);">🍽️ Mới nhất • ${esc(top.authorName)} (${fmtTime(top.time)})</div>
+            <div style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(top.title)} ${top.kcal ? `• <b>${top.kcal} kcal</b>` : ""}</div>
+          </div>
+          <span style="font-size:12px;color:var(--p);font-weight:700;">Xem →</span>
+        `;
+      } else {
+        banner.style.display = "none";
+      }
+
+      $("liveFeedList").innerHTML = mealFeed.length
+        ? mealFeed.map((item) => `
+            <div class="feed-item">
+              ${item.imageData ? `<img class="feed-thumb" src="${item.imageData}" onclick="openLightbox(this.src)" alt="Món ăn">` : ""}
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+                  <strong style="color:var(--p);font-size:13px;">${esc(item.authorName)}</strong>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="muted" style="font-size:11.5px;">${fmtTime(item.time)}</span>
+                    <button type="button" onclick="deleteFeedItem('${esc(item.id)}')" style="background:none;border:0;color:#9ca3af;font-size:14px;">✕</button>
+                  </div>
+                </div>
+                <div style="font-size:14.5px;font-weight:700;margin-top:2px;">${esc(item.title)}</div>
+                ${item.kcal ? `<div style="font-size:12.5px;color:var(--a);font-weight:700;">🔥 ${item.kcal} kcal • 🥩 ${item.protein || 0}g đạm</div>` : ""}
+                ${item.note ? `<div style="font-size:12.5px;color:#374151;margin-top:3px;white-space:pre-line;">${esc(item.note)}</div>` : ""}
+              </div>
+            </div>
+          `).join("")
+        : `<p class="muted" style="margin:0;">Chưa có ảnh món ăn nào. Hãy chụp bữa ăn để người kia thấy ngay nhé!</p>`;
+    }
+
+    window.deleteFeedItem = async (id) => {
+      if (!confirm("Xóa ảnh bữa ăn này?")) return;
+      try {
+        const res = await apiCall("/api/sync", "deleteMeal", { deviceId, mealId: id });
+        mealFeed = res.mealFeed || [];
+        localStorage.setItem(VER_KEY, String(res.version));
+        renderMealFeed();
+        toast("Đã xóa ảnh bữa ăn");
+      } catch (e) { toast(e.message); }
+    };
+
+    // Chụp gửi nhanh không cần qua AI
+    $("quickCamInput").onchange = async (e) => {
+      const f = e.target.files?.[0];
+      if (!f) return;
+      const title = prompt("Món đang ăn là gì? (Bỏ trống nếu chỉ gửi ảnh)") || "Vừa chụp bữa ăn";
+      try {
+        toast("📸 Đang nén & gửi ảnh lên...");
+        const small = await compressImage(f, 480, 0.65);
+        const res = await apiCall("/api/sync", "postMeal", { deviceId, title, imageData: small });
+        mealFeed = res.mealFeed || [];
+        localStorage.setItem(VER_KEY, String(res.version));
+        renderMealFeed();
+        toast("☁️ Đã gửi ảnh trực tiếp!");
+      } catch (err) { toast(err.message); }
+      e.target.value = "";
+    };
+
+    // Chọn ảnh để phân tích AI
+    async function handlePhotoPick(file) {
+      if (!file) return;
+      try {
+        currentImageForAI = await compressImage(file, 720, 0.72);
+        $("imgPrev").src = currentImageForAI;
+        $("imgPrev").style.display = "block";
+        lastAIAnalysis = null;
+        $("aiOut").innerHTML = `<div class="info-box">Đã chọn ảnh! Bấm <b>"✨ Phân tích bằng AI"</b> để tính calo và chia sẻ.</div>`;
+      } catch { toast("Không đọc được ảnh"); }
+    }
+    $("mealCam").onchange = (e) => handlePhotoPick(e.target.files?.[0]);
+    $("mealFile").onchange = (e) => handlePhotoPick(e.target.files?.[0]);
+
+    // Gọi Gemini AI phân tích ảnh món Việt
+    $("analyzeBtn").onclick = async () => {
+      if (!currentImageForAI) return toast("Hãy chụp hoặc chọn 1 ảnh bữa ăn trước!");
+      const btn = $("analyzeBtn");
+      btn.disabled = true;
+      btn.textContent = "⏳ AI đang nhận diện món ăn...";
+      $("aiOut").innerHTML = `<div class="info-box">Đang ước lượng gram, calo, đạm &amp; vi chất bằng Gemini AI...</div>`;
+
+      try {
+        const m = calcMetrics();
+        const defs = DEFS.filter((d) => state.profile.defs.includes(d.id)).map((d) => d.name).join(", ") || "Không";
+        const hint = $("mealHint").value.trim();
+
+        const prompt = `Bạn là chuyên gia dinh dưỡng Việt Nam. Hãy phân tích ảnh bữa ăn này (${hint ? "Ghi chú thêm: " + hint : "không có ghi chú"}).
+Mục tiêu người ăn: tăng cân khỏe nữ, ${m.target} kcal/ngày, cần chú ý vi chất: ${defs}.
+Trả về JSON đúng cấu trúc sau:
+{
+  "title": "Tên ngắn gọn các món chính trong ảnh",
+  "items": [{"name": "Tên món", "grams": 150, "kcal": 220}],
+  "kcal": 550,
+  "protein": 24,
+  "carb": 65,
+  "fat": 18,
+  "micronutrients": ["Sắt", "Vitamin C"],
+  "missing": ["Canxi"],
+  "advice": "Nhận xét ngắn gọn và gợi ý ăn kèm để đủ dinh dưỡng"
+}`;
+
+        const aiRes = await apiCall("/api/gemini", "", { prompt, imageBase64: currentImageForAI, expectJson: true });
+        const parsed = JSON.parse(aiRes.text);
+        lastAIAnalysis = parsed;
+
+        $("aiOut").innerHTML = `
+          <div class="info-box" style="margin-bottom:10px;">
+            <strong style="font-size:15px;color:var(--p);">${esc(parsed.title)}</strong>
+            <div style="margin:6px 0;font-weight:700;">🔥 ${parsed.kcal} kcal • 🥩 Đạm ${parsed.protein}g • 🍚 Bột ${parsed.carb}g • 🥑 Béo ${parsed.fat}g</div>
+            <div style="font-size:12.5px;margin-bottom:6px;">
+              ${(parsed.items || []).map((it) => `• ${esc(it.name)} (~${it.grams}g): ${it.kcal} kcal`).join("<br>")}
+            </div>
+            <div style="font-size:12.5px;"><b>Vi chất có:</b> ${(parsed.micronutrients || []).join(", ") || "Đa dạng"}</div>
+            <div style="font-size:12.5px;color:var(--a);"><b>Nên bổ sung thêm:</b> ${(parsed.missing || []).join(", ") || "Cân đối"}</div>
+            <div style="font-size:12.5px;margin-top:4px;">💡 ${esc(parsed.advice)}</div>
+          </div>
+          <button type="button" id="saveAnalyzedMealBtn" class="btn btn-sec btn-full">✅ Lưu vào Nhật ký hôm nay</button>
+        `;
+
+        $("saveAnalyzedMealBtn").onclick = () => {
+          addMealLog($("mealSlot").value, parsed.title, parsed.kcal, parsed.protein);
+          $("saveAnalyzedMealBtn").disabled = true;
+          $("saveAnalyzedMealBtn").textContent = "✓ Đã lưu vào nhật ký";
+        };
+
+        // Tự động gửi ảnh nén nhỏ + kết quả lên Bảng trực tiếp 2 máy
+        const thumbImg = await compressBase64(currentImageForAI, 460, 0.62);
+        const postRes = await apiCall("/api/sync", "postMeal", {
+          deviceId,
+          title: parsed.title,
+          kcal: parsed.kcal,
+          protein: parsed.protein,
+          note: parsed.advice,
+          imageData: thumbImg
+        });
+        mealFeed = postRes.mealFeed || [];
+        localStorage.setItem(VER_KEY, String(postRes.version));
+        renderMealFeed();
+        toast("✨ Đã phân tích & chia sẻ lên bảng chung!");
+      } catch (err) {
+        $("aiOut").innerHTML = `<div class="note-box">Lỗi AI: ${esc(err.message)}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "✨ Phân tích bằng AI & Chia sẻ ảnh";
+      }
+    };
+
+    function compressBase64(dataUrl, maxW = 460, quality = 0.62) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, maxW / img.width);
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.src = dataUrl;
+      });
+    }
+
+    function renderPantry() {
+      $("pantryGrid").innerHTML = PANTRY_LIST.map((item) => {
+        const on = (state.pantry || []).includes(item);
+        return `<button type="button" class="pill ${on ? "on" : ""}" data-pantry="${esc(item)}">${esc(item)}</button>`;
+      }).join("");
+      $("pantryExtra").value = state.pantryExtra || "";
+
+      $("pantryGrid").querySelectorAll("[data-pantry]").forEach((btn) => {
+        btn.onclick = () => {
+          const name = btn.dataset.pantry;
+          const set = new Set(state.pantry || []);
+          if (set.has(name)) set.delete(name); else set.add(name);
+          state.pantry = [...set];
+          saveStateAndSync();
+          renderPantry();
+        };
+      });
+    }
+    $("pantryExtra").onchange = () => {
+      state.pantryExtra = $("pantryExtra").value.trim();
+      saveStateAndSync();
+    };
+
+    function addMealLog(slot, name, kcal, pro) {
+      const today = todayISO();
+      if (!state.logsByDate[today]) state.logsByDate[today] = [];
+      state.logsByDate[today].push({
+        id: Date.now(),
+        slot,
+        name,
+        kcal: Number(kcal || 0),
+        pro: Number(pro || 0),
+        time: fmtTime(Date.now())
+      });
+      saveStateAndSync();
+      renderLogs();
+      toast(`✅ Đã thêm ${name} (+${kcal} kcal)`);
+      if (state.autoPlan) generateTodayPlan(true);
+    }
+
+    $("addManualBtn").onclick = () => {
+      const name = $("manualName").value.trim();
+      const kcal = Number($("manualKcal").value || 0);
+      const pro = Number($("manualPro").value || 0);
+      if (!name || kcal <= 0) return toast("Nhập tên món và số calo nhé!");
+      addMealLog($("mealSlot").value, name, kcal, pro);
+      $("manualName").value = "";
+      $("manualKcal").value = "";
+      $("manualPro").value = "";
+    };
+
+    function renderLogs() {
+      const today = todayISO();
+      $("todayDateLbl").textContent = today;
+      $("autoPlan").checked = !!state.autoPlan;
+      const logs = state.logsByDate[today] || [];
+      const m = calcMetrics();
+      const eatenKcal = logs.reduce((s, x) => s + Number(x.kcal || 0), 0);
+      const eatenPro = logs.reduce((s, x) => s + Number(x.pro || 0), 0);
+      const remKcal = Math.max(0, m.target - eatenKcal);
+
+      $("logList").innerHTML = logs.length
+        ? logs.map((x) => `
+            <div class="log-row">
+              <div>
+                <strong>[${esc(x.slot)}] ${esc(x.name)}</strong>
+                <div class="muted">${x.time} • 🔥 ${x.kcal} kcal • 🥩 ${x.pro}g đạm</div>
+              </div>
+              <button type="button" class="btn btn-sm btn-ghost" onclick="removeMealLog(${x.id})">Xóa</button>
+            </div>
+          `).join("") + `<div class="info-box" style="margin-top:10px;">Tổng đã ăn: <b>${eatenKcal} kcal</b> (${eatenPro}g đạm) • Còn cần thêm: <b style="color:var(--a);">${remKcal} kcal</b></div>`
+        : `<p class="muted">Hôm nay chưa ghi bữa ăn nào.</p>`;
+    }
+
+    window.removeMealLog = (id) => {
+      const today = todayISO();
+      state.logsByDate[today] = (state.logsByDate[today] || []).filter((x) => x.id !== id);
+      saveStateAndSync();
+      renderLogs();
+      if (state.autoPlan) generateTodayPlan(true);
+    };
+
+    $("autoPlan").onchange = () => {
+      state.autoPlan = $("autoPlan").checked;
+      saveStateAndSync();
+    };
+
+    $("clearTodayBtn").onclick = () => {
+      if (!confirm("Xóa toàn bộ nhật ký bữa ăn hôm nay?")) return;
+      state.logsByDate[todayISO()] = [];
+      state.todayPlan = null;
+      saveStateAndSync();
+      renderLogs();
+      renderTodayPlan();
+    };
+
+    async function generateTodayPlan(silent = false) {
+      const btn = $("genTodayBtn");
+      btn.disabled = true;
+      btn.textContent = "⏳ Đang tính...";
+      if (!silent) $("todayPlanOut").innerHTML = `<div class="info-box">AI đang cân đối bữa tiếp theo...</div>`;
+
+      try {
+        const m = calcMetrics();
+        const logs = state.logsByDate[todayISO()] || [];
+        const eatenKcal = logs.reduce((s, x) => s + Number(x.kcal || 0), 0);
+        const rem = Math.max(200, m.target - eatenKcal);
+        const pantry = [...(state.pantry || []), state.pantryExtra].filter(Boolean).join(", ");
+        const defs = DEFS.filter((d) => state.profile.defs.includes(d.id)).map((d) => d.name).join(", ");
+
+        const prompt = `Gợi ý thực đơn món Việt bình dân cho phần còn lại hôm nay.
+Đã ăn: ${logs.map((x) => `${x.slot}: ${x.name} (${x.kcal} kcal)`).join("; ") || "Chưa ăn gì"}.
+Cần ăn thêm khoảng: ${rem} kcal. Đồ có sẵn ở nhà: ${pantry || "Món Việt phổ biến"}. Chất cần ưu tiên: ${defs || "Cân bằng"}.
+Trả về JSON:
+{
+  "meals": [{"slot": "Trưa/Chiều/Tối", "dish": "Tên món cụ thể + lượng", "kcal": 550}],
+  "shopping": ["Món cần mua thêm nếu thiếu"],
+  "tip": "Mẹo hấp thụ 1 câu"
+}`;
+        const res = await apiCall("/api/gemini", "", { prompt, expectJson: true });
+        state.todayPlan = JSON.parse(res.text);
+        saveStateAndSync();
+        renderTodayPlan();
+      } catch (err) {
+        if (!silent) $("todayPlanOut").innerHTML = `<div class="note-box">${esc(err.message)}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "✨ AI gợi ý ngay";
+      }
+    }
+
+    function renderTodayPlan() {
+      const p = state.todayPlan;
+      if (!p) {
+        $("todayPlanOut").innerHTML = `<p class="muted">Bấm "✨ AI gợi ý ngay" để AI gợi ý bữa tiếp theo dựa trên đồ ăn có sẵn trong tủ lạnh.</p>`;
+        return;
+      }
+      $("todayPlanOut").innerHTML = `
+        ${(p.meals || []).map((x) => `<div class="meal-card"><strong>${esc(x.slot)} (~${x.kcal} kcal):</strong> ${esc(x.dish)}</div>`).join("")}
+        ${p.shopping?.length ? `<div class="note-box" style="margin-top:8px;"><b>🛒 Có thể mua thêm:</b> ${esc(p.shopping.join(", "))}</div>` : ""}
+        ${p.tip ? `<p class="muted" style="margin:8px 0 0;">💡 ${esc(p.tip)}</p>` : ""}
+      `;
+    }
+    $("genTodayBtn").onclick = () => generateTodayPlan(false);
+
+    // ========= 7. TAB THỰC ĐƠN 7 NGÀY & TẬP LUYỆN =========
+    $("genWeekBtn").onclick = async () => {
+      const btn = $("genWeekBtn");
+      btn.disabled = true;
+      btn.textContent = "⏳ AI đang lập...";
+      $("weekOut").innerHTML = `<div class="info-box">AI đang thiết kế thực đơn 7 ngày món Việt theo mục tiêu ${calcMetrics().target} kcal/ngày...</div>`;
+      try {
+        const m = calcMetrics();
+        const pantry = [...(state.pantry || []), state.pantryExtra].filter(Boolean).join(", ");
+        const defs = DEFS.filter((d) => state.profile.defs.includes(d.id)).map((d) => d.name).join(", ");
+        const prompt = `Lập thực đơn tăng cân khỏe 7 ngày cho nữ (mục tiêu ~${m.target} kcal/ngày, ${m.proG}g đạm).
+Món Việt bình dân dễ nấu, tận dụng đồ sẵn có: ${pantry}. Bổ sung vi chất: ${defs || "Sắt, Canxi, Đạm"}.
+Trả về JSON đúng định dạng mảng 7 ngày:
+{
+  "days": [
+    {
+      "day": "Thứ 2",
+      "main": ["Sáng: ...", "Trưa: ...", "Tối: ..."],
+      "snacks": ["Phụ sáng: ...", "Phụ chiều: ..."],
+      "tip": "Mẹo hấp thụ chất"
+    }
+  ]
+}`;
+        const res = await apiCall("/api/gemini", "", { prompt, expectJson: true });
+        state.weekPlan = JSON.parse(res.text);
+        saveStateAndSync();
+        renderWeekTab();
+        toast("📅 Đã cập nhật thực đơn 7 ngày!");
+      } catch (err) {
+        $("weekOut").innerHTML = `<div class="note-box">${esc(err.message)}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "✨ AI lập cả tuần";
+      }
+    };
+
+    function renderWeekTab() {
+      const m = calcMetrics();
+      $("dayTabs").innerHTML = DAYS_VN.map((d, idx) => `
+        <button type="button" class="day-chip ${idx === selectedWeekDay ? "active" : ""}" onclick="pickWeekDay(${idx})">${d}</button>
+      `).join("");
+
+      const days = state.weekPlan?.days;
+      if (!days || !days.length) {
+        $("weekOut").innerHTML = `<p class="muted">Chưa có thực đơn 7 ngày. Hãy bấm <b>"✨ AI lập cả tuần"</b> để tạo thực đơn riêng.</p>`;
+      } else {
+        const cur = days[selectedWeekDay] || days[0];
+        $("weekOut").innerHTML = `
+          <div class="info-box" style="margin-bottom:10px;"><strong>${esc(cur.day || DAYS_VN[selectedWeekDay])}</strong></div>
+          ${(cur.main || []).map((x) => `<div class="meal-card">${esc(x)}</div>`).join("")}
+          ${(cur.snacks || []).map((x) => `<div class="meal-card" style="background:#fffbeb;border-color:#fde68a;">${esc(x)}</div>`).join("")}
+          ${cur.tip ? `<div class="muted" style="margin-top:6px;">💡 ${esc(cur.tip)}</div>` : ""}
+        `;
+      }
+
+      const workoutSchedule = [
+        { d: "Thứ 2", type: "Tập sức mạnh 30p (Squat, Lunge, Chống đẩy tường)", kcal: m.target + 100 },
+        { d: "Thứ 3", type: "Đi bộ nhẹ / Giãn cơ 20p", kcal: m.target - 75 },
+        { d: "Thứ 4", type: "Tập sức mạnh 30p (Mông đùi, Lưng, Bụng)", kcal: m.target + 100 },
+        { d: "Thứ 5", type: "Nghỉ ngơi phục hồi", kcal: m.target - 75 },
+        { d: "Thứ 6", type: "Tập sức mạnh 30p (Toàn thân + tạ nhẹ/dây kháng lực)", kcal: m.target + 100 },
+        { d: "Thứ 7", type: "Yoga / Đi bộ thư giãn", kcal: m.target - 75 },
+        { d: "Chủ nhật", type: "Nghỉ ngơi, chuẩn bị đồ ăn tuần mới", kcal: m.target - 75 }
+      ];
+      $("workoutOut").innerHTML = workoutSchedule.map((w) => `
+        <div class="log-row">
+          <div><strong>${w.d}</strong><div class="muted">${w.type}</div></div>
+          <span class="sync-badge">${w.kcal} kcal</span>
+        </div>
+      `).join("") + `<div class="note-box" style="margin-top:10px;">Sau buổi tập sức mạnh nên ăn thêm 1 bữa phụ có đạm + tinh bột (sữa chua chuối, trứng luộc, bánh mì bơ đậu phộng) để tăng cơ đẹp thay vì chỉ tích mỡ.</div>`;
+    }
+
+    window.pickWeekDay = (idx) => {
+      selectedWeekDay = idx;
+      renderWeekTab();
+    };
+
+    // ========= 8. TAB CÂN NẶNG, BIỂU ĐỒ SVG & SAO LƯU =========
+    $("addWeightBtn").onclick = () => {
+      const date = $("wDate").value || todayISO();
+      const val = parseFloat($("wVal").value);
+      const goal = parseFloat($("wGoal").value);
+      if (!val || val < 25 || val > 150) return toast("Nhập cân nặng hợp lệ (kg)!");
+
+      if (goal) state.wGoal = goal;
+      state.wDeadline = $("wDeadline").value || "";
+
+      const list = (state.weights || []).filter((x) => x.date !== date);
+      list.push({ date, val });
+      list.sort((a, b) => a.date.localeCompare(b.date));
+      state.weights = list;
+      state.profile.weight = val;
+
+      saveStateAndSync();
+      renderAll();
+      toast(`⚖️ Đã lưu cân nặng ${val} kg!`);
+    };
+
+    function renderWeightTab() {
+      $("wDate").value = $("wDate").value || todayISO();
+      $("wGoal").value = state.wGoal || "";
+      $("wDeadline").value = state.wDeadline || "";
+
+      const list = [...(state.weights || [])].sort((a, b) => a.date.localeCompare(b.date));
+      const goal = Number(state.wGoal) || 0;
+
+      if (!list.length) {
+        $("wStats").innerHTML = `<p class="muted">Hãy ghi lần cân đầu tiên để bắt đầu theo dõi xu hướng.</p>`;
+        $("wChart").innerHTML = `<p class="muted">Chưa có dữ liệu biểu đồ.</p>`;
+        $("wList").innerHTML = "";
+        return;
+      }
+
+      const first = list[0], last = list[list.length - 1];
+      const diff = +(last.val - first.val).toFixed(1);
+      const h = (Number(state.profile.height) || 158) / 100;
+      const goalBmi = goal ? +(goal / (h * h)).toFixed(1) : null;
+
+      let forecast = "Cần >= 3 lần cân để dự báo";
+      if (list.length >= 3) {
+        const recent = list.slice(-14);
+        const t0 = new Date(recent[0].date).getTime();
+        const xs = recent.map((x) => (new Date(x.date).getTime() - t0) / 86400000);
+        const ys = recent.map((x) => x.val);
+        const mx = xs.reduce((a, b) => a + b, 0) / xs.length;
+        const my = ys.reduce((a, b) => a + b, 0) / ys.length;
+        const num = xs.reduce((s, x, i) => s + (x - mx) * (ys[i] - my), 0);
+        const den = xs.reduce((s, x) => s + (x - mx) ** 2, 0);
+        const slope = den > 0 ? num / den : 0;
+        const weekRate = +(slope * 7).toFixed(2);
+
+        if (goal && last.val < goal && slope > 0.005) {
+          const daysLeft = Math.ceil((goal - last.val) / slope);
+          const eta = new Date(new Date(last.date).getTime() + daysLeft * 86400000);
+          forecast = `~${weekRate} kg/tuần • Dự kiến đạt ${goal}kg ngày ${eta.toLocaleDateString("vi-VN")}`;
+        } else {
+          forecast = `Xu hướng gần đây: ${weekRate >= 0 ? "+" : ""}${weekRate} kg/tuần`;
+        }
+      }
+
+      $("wStats").innerHTML = `
+        <div class="stat-grid">
+          <div class="stat-box"><div class="lbl">Cân gần nhất</div><div class="val">${last.val} kg</div><div class="sub">${last.date}</div></div>
+          <div class="stat-box"><div class="lbl">Thay đổi</div><div class="val" style="color:${diff >= 0 ? "var(--ok)" : "var(--a)"}">${diff >= 0 ? "+" : ""}${diff} kg</div><div class="sub">Từ ${first.val} kg</div></div>
+        </div>
+        <div class="info-box">
+          ${goal ? `<b>Mục tiêu:</b> ${goal} kg ${goalBmi ? `(BMI ${goalBmi})` : ""}<br>` : ""}
+          <b>Dự báo:</b> ${forecast}
+        </div>
+      `;
+
+      // Vẽ biểu đồ SVG
+      const W = 560, H = 200, pad = 34;
+      const vals = list.map((x) => x.val).concat(goal ? [goal] : []);
+      const minV = Math.floor(Math.min(...vals) - 1);
+      const maxV = Math.ceil(Math.max(...vals) + 1);
+      const xPos = (i) => list.length === 1 ? W / 2 : pad + (i / (list.length - 1)) * (W - pad * 2);
+      const yPos = (v) => H - pad - ((v - minV) / Math.max(1, maxV - minV)) * (H - pad * 2);
+
+      const pts = list.map((it, i) => `${xPos(i)},${yPos(it.val)}`).join(" ");
+      const goalY = goal ? yPos(goal) : null;
+
+      $("wChart").innerHTML = `
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:320px;height:auto;display:block;">
+          <line x1="${pad}" y1="${pad}" x2="${pad}" y2="${H - pad}" stroke="#e5e7eb"/>
+          <line x1="${pad}" y1="${H - pad}" x2="${W - pad}" y2="${H - pad}" stroke="#e5e7eb"/>
+          ${goalY !== null ? `<line x1="${pad}" y1="${goalY}" x2="${W - pad}" y2="${goalY}" stroke="#d97706" stroke-dasharray="5 5"/><text x="${W - pad - 4}" y="${goalY - 5}" text-anchor="end" font-size="11" fill="#d97706">Mục tiêu ${goal}kg</text>` : ""}
+          ${list.length > 1 ? `<polyline fill="none" stroke="#0f766e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${pts}"/>` : ""}
+          ${list.map((it, i) => `
+            <circle cx="${xPos(i)}" cy="${yPos(it.val)}" r="5" fill="#0f766e" stroke="#fff" stroke-width="2"/>
+            <text x="${xPos(i)}" y="${yPos(it.val) - 9}" text-anchor="middle" font-size="11" font-weight="700" fill="#1f2937">${it.val}</text>
+            <text x="${xPos(i)}" y="${H - 12}" text-anchor="middle" font-size="10" fill="#6b7280">${it.date.slice(5)}</text>
+          `).join("")}
+        </svg>
+      `;
+
+      $("wList").innerHTML = [...list].reverse().map((it) => `
+        <div class="log-row">
+          <div><strong>${it.val} kg</strong> <span class="muted">• ${it.date}</span></div>
+          <button type="button" class="btn btn-sm btn-ghost" onclick="removeWeight('${it.date}')">Xóa</button>
+        </div>
+      `).join("");
+    }
+
+    window.removeWeight = (date) => {
+      state.weights = (state.weights || []).filter((x) => x.date !== date);
+      saveStateAndSync();
+      renderWeightTab();
+    };
+
+    // Sao lưu & khôi phục JSON
+    $("exportBtn").onclick = () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `can-bang-backup-${todayISO()}.json`;
+      a.click();
+    };
+    $("importFile").onchange = async (e) => {
+      const f = e.target.files?.[0];
+      if (!f) return;
+      try {
+        const parsed = JSON.parse(await f.text());
+        state = { ...defaultState(), ...parsed };
+        saveStateAndSync(true);
+        renderAll();
+        toast("✅ Đã khôi phục dữ liệu!");
+      } catch { toast("File sao lưu không hợp lệ!"); }
+      e.target.value = "";
+    };
+
+    // ========= 9. KHỞI CHẠY =========
+    function renderAll() {
+      renderTodayHeader();
+      renderGoalTab();
+      renderPantry();
+      renderLogs();
+      renderTodayPlan();
+      renderWeekTab();
+      renderWeightTab();
+    }
+
+    renderAll();
+
+    if (getToken()) {
+      $("roleLabel").textContent = localStorage.getItem(ROLE_KEY) || "Thành viên";
+      pullFromCloud(true);
+      startPolling();
+    } else {
+      $("lockOverlay").style.display = "flex";
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") checkUpdates();
+    });
+  </script>
+</body>
+</html>
